@@ -1,0 +1,32 @@
+{
+    "cuenta": "C-DEMO-SIM",
+    "evento": "T-SIM-0001",
+    "scores": {
+        "NSalidas60min": 0,
+        "ScorePhishing": 600,
+        "ScoreCuentaMula": 100,
+        "ScoreSimSwapping": 1000
+    },
+    "crear_caso": {
+        "caseKey": "AccountId",
+        "caseKeyValue": "C-DEMO-SIM",
+        "suspendBypass": false,
+        "caseWorkflowGuid": "559ff92f-0670-4019-84de-bced038c427f",
+        "suspendBypassDate": "2026-11-21T16:33:52.328497Z",
+        "caseWorkflowStatusGuid": "a98e4d1e-21d2-484d-bb2f-64c0e83606e2"
+    },
+    "reglas_activadas": {
+        "PHISHING_QR_YUMA": {
+            "forced": false,
+            "visible": true
+        },
+        "SIM_SWAPPING_YUMA": {
+            "forced": false,
+            "visible": true
+        },
+        "IncrementTtlCounterAll": {
+            "forced": false,
+            "visible": false
+        }
+    }
+}

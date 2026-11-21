@@ -1,6 +1,31 @@
+# Python
 __pycache__/
 *.pyc
+
+# Variables de entorno y credenciales (nunca subir)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*apikey*
+*api_key*
+*api-key*
+
+# JSON que suele contener claves o tokens
+*secret*.json
+*secrets*.json
+*credential*.json
+*credenciales*.json
+*token*.json
+*clave*.json
+*claves*.json
+*apikey*.json
+*api_key*.json
+config.local.json
+
+# Datos y modelos del reto (no publicar)
 *.pkl
 *.db
 *.csv

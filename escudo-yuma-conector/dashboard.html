@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escudo Yuma: prueba de extremo a extremo</title>
+<style>
+  :root { --fondo:#f4f6f8; --tarjeta:#fff; --texto:#1c2733; --suave:#5b6b7b; --borde:#dbe2e8;
+          --bajo:#2e7d32; --medio:#b26a00; --alto:#c62828; --critico:#7b1fa2; --ok:#1b5e20; --mal:#b71c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--fondo); color:var(--texto); }
+  header { padding:20px 24px 8px; }
+  h1 { margin:0 0 4px; font-size:1.4rem; }
+  .sub { margin:0; color:var(--suave); font-size:.95rem; }
+  main { padding:12px 24px 32px; max-width:1100px; margin:0 auto; }
+  .estado { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0; }
+  .chip { padding:6px 12px; border-radius:999px; font-size:.85rem; background:#e9edf1; border:1px solid var(--borde); }
+  .chip.ok { background:#e8f5e9; border-color:#a5d6a7; color:var(--ok); }
+  .chip.mal { background:#ffebee; border-color:#ef9a9a; color:var(--mal); }
+  .botones { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; }
+  button { font:inherit; padding:10px 16px; border-radius:8px; border:1px solid #9fb0c0; background:#fff; cursor:pointer; }
+  button:hover:not(:disabled) { background:#eef3f8; }
+  button:focus-visible { outline:3px solid #1976d2; outline-offset:2px; }
+  button:disabled { opacity:.55; cursor:wait; }
+  button.primario { background:#1976d2; color:#fff; border-color:#1976d2; }
+  button.primario:hover:not(:disabled) { background:#1565c0; }
+  .resumen { padding:12px 16px; border-radius:8px; margin:8px 0 16px; border:1px solid var(--borde); background:var(--tarjeta); }
+  .resumen.ok { border-color:#a5d6a7; background:#e8f5e9; }
+  .resumen.mal { border-color:#ef9a9a; background:#ffebee; }
+  .tarjetas { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .tarjeta { background:var(--tarjeta); border:1px solid var(--borde); border-radius:10px; padding:14px 16px; }
+  .tarjeta h2 { margin:0 0 2px; font-size:1rem; }
+  .cuenta { color:var(--suave); font-size:.85rem; margin-bottom:8px; }
+  .puntaje { font-size:2.4rem; font-weight:700; line-height:1.1; }
+  .nivel { display:inline-block; margin-left:8px; padding:2px 10px; border-radius:999px; color:#fff; font-size:.8rem; vertical-align:middle; }
+  .nivel.bajo { background:var(--bajo); } .nivel.medio { background:var(--medio); }
+  .nivel.alto { background:var(--alto); } .nivel.critico { background:var(--critico); }
+  .parciales { font-size:.85rem; color:var(--suave); margin:6px 0; }
+  ul { margin:6px 0 0; padding-left:18px; font-size:.9rem; }
+  .verif { margin-top:10px; font-weight:600; font-size:.9rem; }
+  .verif.ok { color:var(--ok); } .verif.mal { color:var(--mal); }
+  .vacia { color:var(--suave); font-size:.9rem; }
+  .error { color:var(--mal); font-size:.9rem; }
+  footer { color:var(--suave); font-size:.8rem; margin-top:24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Escudo Yuma: prueba de extremo a extremo</h1>
+  <p class="sub">Cada botón envía un caso de prueba al conector y compara el puntaje con RESULTADOS_DEMO.md. Datos sintéticos (cuentas DEMO).</p>
+</header>
+<main>
+  <div class="estado" id="estado" aria-live="polite">
+    <span class="chip" id="chip-conector">Conector: comprobando…</span>
+    <span class="chip" id="chip-jube">Jube: comprobando…</span>
+  </div>
+
+  <div class="botones" role="group" aria-label="Casos de prueba, en orden">
+    <button id="btn-sim"    data-caso="0">1. SIM Swapping</button>
+    <button id="btn-mula"   data-caso="1">2. Cuenta mula</button>
+    <button id="btn-qr"     data-caso="2">3. Phishing por QR</button>
+    <button id="btn-normal" data-caso="3">4. Operación normal</button>
+    <button id="btn-todos" class="primario">Probar los 4 en orden</button>
+  </div>
+
+  <div class="resumen" id="resumen" aria-live="polite">Aún no se ha probado ningún caso.</div>
+
+  <div class="tarjetas" id="tarjetas">
+    <article class="tarjeta" id="t-0"><h2>SIM Swapping</h2><div class="cuenta">T-SIM-0001 / C-DEMO-SIM · esperado 1000</div><div class="vacia">Sin resultado todavía.</div></article>
+    <article class="tarjeta" id="t-1"><h2>Cuenta mula</h2><div class="cuenta">T-MULA-0001 / C-DEMO-MULA · esperado 900</div><div class="vacia">Sin resultado todavía.</div></article>
+    <article class="tarjeta" id="t-2"><h2>Phishing por QR</h2><div class="cuenta">T-QR-0001 / C-DEMO-QR · esperado 550</div><div class="vacia">Sin resultado todavía.</div></article>
+    <article class="tarjeta" id="t-3"><h2>Operación normal</h2><div class="cuenta">T-OK-0001 / C-DEMO-OK · esperado 0</div><div class="vacia">Sin resultado todavía.</div></article>
+  </div>
+
+  <footer>La página y la API se sirven desde el mismo origen (este servidor reenvía /evaluar al conector del puerto 8000), por eso no hay peticiones entre orígenes ni errores de CORS.</footer>
+</main>
+
+<script>
+"use strict";
+// Mismos casos y puntajes esperados que RESULTADOS_DEMO.md
+const CASOS = [
+  { titulo: "SIM Swapping",     archivo: "caso1_sim_swapping.json", esperado: 1000, cuenta: "T-SIM-0001 / C-DEMO-SIM" },
+  { titulo: "Cuenta mula",      archivo: "caso2_mula.json",         esperado: 900,  cuenta: "T-MULA-0001 / C-DEMO-MULA" },
+  { titulo: "Phishing por QR",  archivo: "caso3_qr.json",           esperado: 550,  cuenta: "T-QR-0001 / C-DEMO-QR" },
+  { titulo: "Operación normal", archivo: "caso4_normal.json",       esperado: 0,    cuenta: "T-OK-0001 / C-DEMO-OK" },
+];
+const NOMBRES = { sim_swapping: "SIM Swapping", cuenta_mula: "Cuenta mula", phishing: "Phishing" };
+const resultados = [null, null, null, null];
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+async function estado() {
+  try {
+    const e = await (await fetch("/estado")).json();
+    for (const [id, clave, nombre] of [["chip-conector","conector","Conector (8000)"],["chip-jube","jube","Jube (5001)"]]) {
+      const ok = e[clave].ok;
+      $(id).textContent = nombre + ": " + (ok ? "en línea" : "sin respuesta");
+      $(id).className = "chip " + (ok ? "ok" : "mal");
+    }
+  } catch (err) {
+    $("chip-conector").textContent = "Conector: error al consultar (" + err.message + ")";
+    $("chip-conector").className = "chip mal";
+  }
+}
+
+async function probar(i) {
+  const caso = CASOS[i];
+  const tarjeta = $("t-" + i);
+  tarjeta.innerHTML = "<h2>" + esc(caso.titulo) + "</h2><div class='vacia'>Evaluando…</div>";
+  try {
+    const rCaso = await fetch("/casos_prueba/" + caso.archivo);
+    if (!rCaso.ok) throw new Error("No se pudo leer " + caso.archivo + " (HTTP " + rCaso.status + ")");
+    const operacion = await rCaso.json();
+    delete operacion._nota;                       // el comando de ejemplo no es parte de la operación
+    const r = await fetch("/evaluar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(operacion) });
+    const ev = await r.json();
+    if (!r.ok) throw new Error("El conector respondió HTTP " + r.status + ": " + JSON.stringify(ev).slice(0, 150));
+    resultados[i] = { ev, ok: ev.puntaje_maximo === caso.esperado };
+    pintar(i, ev);
+  } catch (err) {
+    resultados[i] = { error: err.message, ok: false };
+    tarjeta.innerHTML = "<h2>" + esc(caso.titulo) + "</h2><div class='cuenta'>" + esc(caso.cuenta) + "</div><div class='error' role='alert'>Error: " +
+      esc(err.message) + "</div>";
+  }
+  resumen();
+}
+
+function pintar(i, ev) {
+  const caso = CASOS[i];
+  const max = ev.puntaje_maximo;
+  const coincide = max === caso.esperado;
+  const principal = ev.modalidad_principal;
+  const razones = principal ? ev[principal].razones : [];
+  const nivel = principal ? ev[principal].nivel : "bajo";
+  $("t-" + i).dataset.puntaje = max;
+  $("t-" + i).innerHTML =
+    "<h2>" + esc(caso.titulo) + "</h2>" +
+    "<div class='cuenta'>" + esc(caso.cuenta) + " · esperado " + caso.esperado + "</div>" +
+    "<div><span class='puntaje'>" + max + "</span><span class='nivel " + esc(nivel) + "'>" + esc(nivel) + "</span></div>" +
+    "<div class='parciales'>SIM " + ev.sim_swapping.puntaje + " · Mula " + ev.cuenta_mula.puntaje + " · Phishing " + ev.phishing.puntaje +
+      " · " + ev.latencia_ms + " ms</div>" +
+    (principal ? "<div><strong>" + esc(NOMBRES[principal]) + "</strong></div>" : "") +
+    (razones.length ? "<ul>" + razones.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "<div class='vacia'>Sin señales de riesgo.</div>") +
+    "<div class='verif " + (coincide ? "ok" : "mal") + "'>" + (coincide ? "✔ Coincide con RESULTADOS_DEMO.md (" + caso.esperado + ")"
+                                                                         : "✘ No coincide: esperado " + caso.esperado + ", salió " + max) + "</div>";
+}
+
+function resumen() {
+  const hechos = resultados.filter((x) => x !== null);
+  const buenos = resultados.filter((x) => x && x.ok).length;
+  const el = $("resumen");
+  if (hechos.length < 4) { el.className = "resumen"; el.textContent = hechos.length + " de 4 casos probados; " + buenos + " coinciden."; return; }
+  el.className = "resumen " + (buenos === 4 ? "ok" : "mal");
+  el.innerHTML = "<strong>" + buenos + " de 4 casos coinciden con RESULTADOS_DEMO.md</strong> (1000, 900, 550 y 0)." +
+                 (buenos === 4 ? " La operación normal da 0 y no debe abrir caso." : " Revisa los casos marcados con ✘.");
+}
+
+async function todos() {
+  const botones = document.querySelectorAll("button");
+  botones.forEach((b) => (b.disabled = true));
+  for (let i = 0; i < CASOS.length; i++) await probar(i);   // en orden: SIM, Mula, QR, Normal
+  botones.forEach((b) => (b.disabled = false));
+}
+
+document.querySelectorAll("button[data-caso]").forEach((b) => b.addEventListener("click", async () => {
+  b.disabled = true; await probar(Number(b.dataset.caso)); b.disabled = false;
+}));
+$("btn-todos").addEventListener("click", todos);
+estado();
+</script>
+</body>
+</html>

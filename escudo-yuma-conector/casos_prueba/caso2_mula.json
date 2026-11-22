@@ -1,0 +1,13 @@
+{
+  "_nota": "Invoke-RestMethod -Uri http://localhost:8000/evaluar -Method Post -ContentType 'application/json' -InFile casos_prueba/caso2_mula.json",
+  "id_transaccion": "T-MULA-0001",
+  "id_cliente": "C-DEMO-MULA",
+  "tipo_operacion": "transferencia_inmediata",
+  "canal": "app",
+  "monto_cop": 300000,
+  "saldo_antes_cop": 2000000,
+  "tipo_destino": "cuenta_yuma",
+  "destino_nuevo": true,
+  "fi_all": 8,
+  "dest_fraude_previo": true
+}

@@ -1,0 +1,15 @@
+{
+  "_nota": "Invoke-RestMethod -Uri http://localhost:8000/evaluar -Method Post -ContentType 'application/json' -InFile casos_prueba/caso1_sim_swapping.json",
+  "id_transaccion": "T-SIM-0001",
+  "id_cliente": "C-DEMO-SIM",
+  "tipo_operacion": "transferencia_inmediata",
+  "canal": "app",
+  "monto_cop": 900000,
+  "saldo_antes_cop": 1000000,
+  "tipo_destino": "otra_entidad",
+  "destino_nuevo": true,
+  "dispositivo_nuevo": true,
+  "cambio_clave_24h": true,
+  "cambio_sim_48h": true,
+  "min_registro_dispositivo": 10
+}
